@@ -1,0 +1,21 @@
+Package: relay
+Type: Package
+Title: Flexible workflow tracking
+Version: 0.1.5
+Author: person('Allen', 'OBrien', email= 'allen.g.obrien@gmail.com', role = c('aut', 'cre'))
+Maintainer: <allen.g.obrien@gmail.com>
+Description: Create objects and YAML configuration files to track progress, status, and completion of workflows in a flexible way.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 3.5.0)
+Imports:
+    purrr,
+    utils,
+    yaml
+Suggests:
+    haven,
+    readr,
+    readxl
+RoxygenNote: 7.1.1
