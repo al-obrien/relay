@@ -126,6 +126,13 @@ grab_baton <- function(baton, loc = NULL) {
   baton$metadata$relay_finish <- NA
   baton$metadata$pass_complete <- FALSE
 
+  # Check if relocation needed
+  if(normalizePath(baton$metadata$location, mustWork = FALSE) != normalizePath(loc, mustWork = FALSE)) {
+    warning('Updating baton YAML location information based upon load location provided.')
+    baton$metadata$location <- loc
+    #baton <- relocate_baton(baton, loc = loc)
+  }
+
   # Update YAML
   convert_baton2yml(baton, write = TRUE)
 
@@ -170,13 +177,19 @@ relocate_baton <- function(baton, loc, silent = FALSE) {
 
   if(!silent) warning('Relocating the baton, prior will be removed to relocated path')
 
-  loc <- file.path(normalizePath(loc, mustWork = TRUE), paste0('_baton-', baton$metadata$id, '.yml'))
+  # Was initially making work with grab_baton, but was unnecessary...
+  # cond <- grepl(x = loc, '\\.[yY][mM][lL]$')
+  # if(!cond) {
+    loc <- file.path(normalizePath(loc, mustWork = TRUE), paste0('_baton-', baton$metadata$id, '.yml'))
+  # } else if (cond) {
+  #   loc <- loc
+  # }
 
   # Could use convert_baton2yml, but easier for error catching if doing this method...
   file.copy(baton$metadata$location, loc)
   message('Baton YAML moved to ', loc)
 
-  if(file.exists(loc)) file.remove(baton$metadata$location) else warning('Did not remove original file as new locaiton was not copied to.')
+  if(file.exists(loc)) file.remove(baton$metadata$location) else warning('Did not remove original file as new location was not copied to.')
 
   baton$metadata$location <- loc
 
