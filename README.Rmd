@@ -7,7 +7,7 @@ knitr::opts_chunk$set(echo = TRUE, out.width = "100%")
 ```
 
 ## Overview
-{relay} is an R package for tracking workflows and their content. The method invokes the idea of a relay, where a baton is created, passed, and grabbed. The *batons* are S3 class objects with an associated YAML file which contain metadata (internal details from system) and content (workflow details from user). Each section of the relay ends in a `pass_baton()`, which both marks the section as being completed successfully and allowing user-specific details to be added as content for tracking. A subsequent `grab_baton()` starts the process over again. The relay can end when the baton is dropped (i.e. `drop_baton()`). {relay} operates 
+{relay} is an R package for tracking workflows and their content. The method invokes the idea of a relay, where a baton is created, passed, and grabbed. The *batons* are S3 class objects with an associated YAML file which contain metadata (internal details from system) and content (workflow details from user). Each section of the relay ends in a `pass_baton()`, which marks both the section as being completed successfully and allowing user-specific details to be added as content for tracking. A subsequent `grab_baton()` starts the process over again. The relay can end when the baton is dropped (i.e. `drop_baton()`). {relay} operates 
 linearly and does support parallel/concurrent access to *batons*.
 
 ## Details

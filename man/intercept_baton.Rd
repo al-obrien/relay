@@ -19,10 +19,10 @@ intercept_baton(baton, loc = NULL, reset_only = FALSE, env = .GlobalEnv)
 S3 class object.
 }
 \description{
-Functionally similar to \code{\link{grab_baton}} but able to obtain \epmh{baton} before the pass operation is complete.
+Functionally similar to \code{\link{grab_baton}} but able to obtain \emph{baton} before the pass operation is complete.
 }
 \details{
-Normally, \code{\link{grab_baton}} is the preferred method to load a \epmh{baton}. However, there are circumstances where a pass
+Normally, \code{\link{grab_baton}} is the preferred method to load a \emph{baton}. However, there are circumstances where a pass
 needs to be \emph{intercepted} mid-pass so that a process can reset and continue. It is recommended to use \code{intercept_baton} in
 limited situations. To avoid loading a baton twice, \code{intercept_baton} will attempt to delete any \emph{baton} in the global environment
 that shares the same ID; this is a measure to ensure a baton is only being acted on linearly. A warning is also provided to remind users that

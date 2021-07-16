@@ -6,12 +6,12 @@ method invokes the idea of a relay, where a baton is created, passed,
 and grabbed. The *batons* are S3 class objects with an associated YAML
 file which contain metadata (internal details from system) and content
 (workflow details from user). Each section of the relay ends in a
-`pass_baton()`, which both marks the section as being completed
+`pass_baton()`, which marks both the section as being completed
 successfully and allowing user-specific details to be added as content
 for tracking. A subsequent `grab_baton()` starts the process over again.
 The relay can end when the baton is dropped (i.e. `drop_baton()`).
 {relay} operates linearly and does support parallel/concurrent access to
-batons.
+*batons*.
 
 ## Details
 
@@ -34,17 +34,17 @@ possible to use these in conjunction with, or possibly as an alternative
 to, {relay}.
 
 The original purpose of {relay} was to provide an easy method for
-scheduled RMarkdown files to be tied together without having to entirely
-new tools. The rationale made sense for our group when considering the
-expertise of the team and the amount of support IT could provide.
-{relay} provides a way for otherwise independent scripts to communicate
-through a saved *baton*. For example, using RStudio Connect or similar
-resource, a set of queries that take several hours can be scheduled
-throughout the day; a downstream process for processing and report
-generation accesses this content. {relay} can provide a way to evaluate
-the health of the query process prior to running any subsequent step.
-Although in this example, the processing step could pull the queries
-directly, there are benefits in having the data pre-fetched.
+scheduled RMarkdown files to be tied together without having to use
+entirely new tools. The rationale made sense for our group when
+considering the expertise of the team and the amount of support IT could
+provide. {relay} provides a way for otherwise independent scripts to
+communicate through a saved *baton*. For example, using RStudio Connect
+or similar resource, a set of queries that take several hours can be
+scheduled throughout the day; a downstream process for processing and
+report generation accesses this content. {relay} can provide a way to
+evaluate the health of the query process prior to running any subsequent
+step. Although in this example, the processing step could pull the
+queries directly, there are benefits in having the data pre-fetched.
 
 There are other use-cases as well; in the simplest case one can
 `create_baton()` specifically to track content from a self-contained
