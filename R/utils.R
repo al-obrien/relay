@@ -47,7 +47,7 @@ locate_batons <- function(loc = .GlobalEnv, suppress_messages = FALSE, ...){
   # If environment
   if(is.environment(loc)) {
 
-    message('Environment variable detected, searching that location in R.')
+    if(!suppress_messages) {message('Environment variable detected, searching that location in R.')}
     l_objs <- ls(envir = loc)
     batons <- l_objs[sapply(l_objs, function(x) inherits(get(x), 'baton'))]
     if(!suppress_messages) {
@@ -66,7 +66,7 @@ locate_batons <- function(loc = .GlobalEnv, suppress_messages = FALSE, ...){
 
   } else {
 
-    message('File path detected, searching that location on drive.')
+    if(!suppress_messages) {message('File path detected, searching that location on drive.')}
     batons <- list.files(loc, pattern = '^_baton-.*\\.yml', ...)
     if(!suppress_messages) writeLines(strwrap(paste0('The following batons are in the selected directory: ', paste0(batons, collapse = ', '))))
     invisible(batons)
@@ -226,14 +226,14 @@ copy_files <- function(path, file_names, to, ...) {
 #' @param path character vector defining the directory containing files to load.
 #' @param file_list character vector of files within directory to load.
 #' @param env R environment to assign data to; default set to \code{.GlobalEnv}.
-#' @param haven_arg,readxl_arg,csv_arg,rds_arg additional parameters passed to load functions depending on file extension.
+#' @param haven_arg,readxl_arg,csv_arg,fst_arg,rds_arg additional parameters passed to load functions depending on file extension.
 #' @param readr boolean value to determine if \code{\link[readr]{read_csv}} is used in preference to \code{\link[utils]{read.csv}}.
 #'
 #' @return data-sets assigned to designated R environment.
 #' @export
-batch_load <- function(path, file_list, env = .GlobalEnv, haven_arg = list(), readxl_arg = list(), csv_arg = list(), rds_arg = list(), readr = TRUE) {
+batch_load <- function(path, file_list, env = .GlobalEnv, haven_arg = list(), readxl_arg = list(), csv_arg = list(), fst_arg = list(), rds_arg = list(), readr = TRUE) {
 
-  valid_args <- c('sas7bdat', 'xlsx', 'csv', 'rds')
+  valid_args <- c('sas7bdat', 'xlsx', 'csv', 'rds', 'fst')
 
   extension <- gsub(tolower(file_list), replacement = '\\1', pattern = '.*\\.(.*$)')
 
@@ -269,7 +269,11 @@ batch_load <- function(path, file_list, env = .GlobalEnv, haven_arg = list(), re
                  envir = env)
         }
       },
-
+      'fst' = {
+        assign(value = do.call(fst::read_fst, c(temp_path, fst_arg)),
+               x = sub(tolower(x), pattern = paste0('.', y ,'$'), replacement = ''),
+               envir = env)
+      },
       'rds' = {
         assign(value = do.call(readRDS, c(temp_path, rds_arg)),
                x = sub(tolower(x), pattern = paste0('.', y ,'$'), replacement = ''),

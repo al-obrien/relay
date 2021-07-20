@@ -1,7 +1,7 @@
 Package: relay
 Type: Package
 Title: Flexible workflow tracking
-Version: 0.1.5
+Version: 0.1.6
 Author: person('Allen', 'OBrien', email= 'allen.g.obrien@gmail.com', role = c('aut', 'cre'))
 Maintainer: <allen.g.obrien@gmail.com>
 Description: Create objects and YAML configuration files to track progress, status, and completion of workflows in a flexible way.
@@ -17,5 +17,6 @@ Imports:
 Suggests:
     haven,
     readr,
-    readxl
+    readxl,
+    fst
 RoxygenNote: 7.1.1

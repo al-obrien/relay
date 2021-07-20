@@ -1,5 +1,5 @@
 The {relay} package as a whole is distributed under MIT; however, {relay} depends
-upon other open source software components, in particular another package called
+upon other open source software components to be installed, in particular another package called
 {yaml} which is covered by a BSD-3-Clause copyright. The description of this
 copyright for {yaml} is provided below:
 
