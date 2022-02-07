@@ -18,6 +18,8 @@
 #'    \item dropped: boolean value of whether the baton has been dropped, signalling and end to the relay.
 #' }
 #'
+#' The logbook operates with \code{\link{write_logbook}} and \code{\link{read_logbook}}, which help track the baton without having to write contents or update the metadata.
+#'
 #' @note Although some generics (\code{\link{summary.baton}}) are used in \{relay\}, most functions just check for the class and do not proceed unless
 #' it is a \emph{baton}. This may be rewritten to use only generics or R6 classes but right now this hybrid approach was used for simplicity.
 #'
@@ -57,6 +59,7 @@ create_baton <- function(content = list(), loc = NULL, auto_assign = FALSE, envi
                                           passes_completed = 0,
                                           location = loc,
                                           dropped = FALSE),
+                          logbook = NULL,
                           content = content),
                      class = "baton")
 

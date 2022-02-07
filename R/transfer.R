@@ -277,3 +277,79 @@ intercept_baton <- function(baton, loc = NULL, reset_only = FALSE, env = .Global
     return(baton)
   }
 }
+
+#' Write to baton's logbook
+#'
+#' Write log information to a baton's logbook without affecting the metadata or contents. This can be considered the microscopic tracking whereas
+#' the metadata and contents are macroscopic. It can be helpful when an error occurs between different passes and you want these details within the baton log.
+#' The baton must be loaded into the R environment in order to perform logging. If you do not use the \code{autoassign} parameter and forget to assign the baton
+#' to itself, one risks losing previous logs.
+#'
+#' @param baton R object of S3 class, created by \code{\link{create_baton}}
+#' @param msg Location of YAML file that was saved from a \emph{baton}.
+#' @param msg_type boolean value which will attempt only to reset the \code{pass_complete} status without loading the \emph{baton}.
+#' @param trunc_long boolean value to determine if messages should be truncated at 256 characters.
+#' @param suppressWarnings boolean value to determine if warning messages upon YAML write are ignored.
+#' @param autoassign boolean value to determine if the passed baton is also refreshed automatically. Recommended as TRUE to ensure logging doesn't have to read and write each time an entry is made.
+#' @param envir Environment where baton exists, default set to .GlobalEnv, only needed when autoassign is TRUE.
+#' @param ... Additional parameters passed to \code{assign}
+#' @seealso \code{\link{read_logbook}}
+#' @return S3 class object.
+#' @export
+write_logbook <- function(baton, msg, msg_type = 'MESSAGE', trunc_long = TRUE, suppressWarnings = TRUE, autoassign = TRUE, envir = .GlobalEnv,  ...) {
+
+  if(baton$metadata$pass_complete) stop('Baton pass complete, cannot write to logbook unless the relay is in process. Try running `grab_baton()`\n')
+
+  btn_name <- deparse(substitute(baton))
+
+  msg_types <- list('TRACE' = 1, 'MESSAGE' = 2, 'WARNING' = 3, 'ERROR' = 4)
+  msg_type <- toupper(msg_type)
+  msg_type <- match.arg(msg_type, choices = names(msg_types), several.ok = FALSE)
+
+  if(trunc_long) {
+    if(nchar(msg) > 256) {
+      msg <- paste0(strtrim(msg, 256), '...')
+    }
+  }
+
+  log_msg <- paste0('Pass [', baton$metadata$passes_completed, '] ', Sys.time(), ' [', msg_type,'] ', msg)
+
+  # Add to log
+  baton$logbook <- c(baton$logbook, log_msg)
+
+  # Update YAML
+  if(suppressWarnings) {
+    suppressWarnings(convert_baton2yml(baton, write = TRUE))
+  } else {convert_baton2yml(baton, write = TRUE)}
+
+
+  # Return value to env
+  if(autoassign){
+    assign(btn_name, baton, envir = envir, ...)
+  } else {
+    invisible(baton)
+  }
+}
+
+#' Read a baton's logbook
+#'
+#' Read log information from a baton's logbook without affecting the metadata or contents.
+#'
+#' @param baton R object of S3 class, created by \code{\link{create_baton}}
+#' @param loc Location of YAML file that was saved from a \emph{baton}.
+#' @param as.list Boolean value, determine if returns as vector or a list.
+#' @seealso \code{\link{write_logbook}}
+#' @return S3 class object.
+#' @export
+read_logbook <- function(baton, loc = NULL, as.list = FALSE) {
+
+  if(!is.null(loc)) {
+    message('Attempting to load baton from YAML...')
+    baton <- convert_yml2baton(loc)
+  }
+
+  if(as.list) {
+    return(as.list(baton$logbook))
+  } else baton$logbook
+
+}
