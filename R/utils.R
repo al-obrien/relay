@@ -83,12 +83,16 @@ locate_batons <- function(loc = .GlobalEnv, suppress_messages = FALSE, ...){
 #' @param ... non-functional, left for future development.
 #'
 #' @export
-summary.baton <- function(object, ...){
+summary.baton <- function(object, include_contents = TRUE, ...){
   validate_baton(object)
   writeLines(strwrap("Metadata of baton...", prefix = "\n"))
   writeLines(strwrap(unlist(lapply(names(object$metadata), function(x) paste0(' *', x , ': ', object$metadata[[x]])))))
-  writeLines(strwrap("Contents of baton...", prefix = "\n"))
-  if(length(object$content) == 0) writeLines(strwrap('  *No contents.')) else writeLines(strwrap(unlist(lapply(names(object$content), function(x) paste0(' *', x , ': ', object$content[[x]])))))
+  if(include_contents){
+    writeLines(strwrap("Contents of baton...", prefix = "\n"))
+    if(length(object$content) == 0) {
+      writeLines(strwrap('  *No contents.'))
+    } else {writeLines(strwrap(unlist(lapply(names(object$content), function(x) paste0(' *', x , ': ', object$content[[x]])))))}
+  }
   invisible(object)
 }
 
