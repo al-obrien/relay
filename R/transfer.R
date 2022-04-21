@@ -127,7 +127,7 @@ grab_baton <- function(baton, loc = NULL) {
   baton$metadata$pass_complete <- FALSE
 
   # Check if relocation needed
-  if(normalizePath(baton$metadata$location, mustWork = FALSE) != normalizePath(loc, mustWork = FALSE)) {
+  if(!is.null(loc) && normalizePath(baton$metadata$location, mustWork = FALSE) != normalizePath(loc, mustWork = FALSE)) {
     warning('Updating baton YAML location information based upon load location provided.')
     baton$metadata$location <- loc
     #baton <- relocate_baton(baton, loc = loc)
