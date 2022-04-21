@@ -361,3 +361,48 @@ compress_bundle <- function(bundle_dir, dir_to, file_extension = '.tar', tar, ex
              extra_flags = extra_flags,
              ...)
 }
+
+#' Read metadata of baton
+#'
+#' Read the metadata content of a baton, either in the environment, or from a file source. This has some functional overlaps with \code{summary} but
+#' is specific to the metadata section. This function will not alter the metadata content, and is a read-only operation. If you want to read log information
+#' try \code{\link{read_logbook}}.
+#'
+#' @param baton R object of S3 class, created by \code{\link{create_baton}}.
+#' @param loc file path to clear YAML files related to baton tracking.
+#' @param subset a integer or character vector of metadata elements to return (defaults to ALL elements). Elements include: id, relay_start, relay_finish, all_passes, pass_complete, passes_completed, location, and dropped.
+#' @export
+#' @examples
+#' \dontrun{
+#'
+#' batons_loc <- locate_batons('/location/where/bundlesorbatons/live', recursive = TRUE, full.name = TRUE)
+#'
+#' # Grab metadata of interest to determine which to load
+#' baton_meta_pass <- purrr::map_lgl(batons_loc, ~unlist(read_metadata(loc = ., subset = c('pass_complete'))))
+#' baton_meta_finish <- purrr::map_chr(batons_loc, ~unlist(read_metadata(loc = ., subset = c('relay_finish'))))
+#'
+#' # Equivalent in base R
+#' baton_meta_pass <- vapply(batons_loc, function(x) unlist(read_metadata(loc = x, subset = c('pass_complete'))), logical(1), USE.NAMES = F)
+#' baton_meta_finish <- vapply(batons_loc, function(x) unlist(read_metadata(loc = x, subset = c('relay_finish'))), character(1), USE.NAMES = F)
+#'
+#' # Determine which baton to keep!
+#' select_baton <- batons_loc[which(baton_meta_finish == max(baton_meta_finish) & baton_meta_pass)]
+#'
+#' }
+read_metadata <- function(baton, loc = NULL, subset = NULL) {
+
+  if(!is.null(loc)) {
+    baton <- convert_yml2baton(loc)
+  }
+
+  # Validate
+  validate_baton(baton)
+
+  # Return list or subset thereof
+  if(!is.null(subset)) {
+    subset <- tolower(subset)
+    return(baton$metadata[subset])
+  } else {
+    return(baton$metadata)
+  }
+}
