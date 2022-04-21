@@ -49,7 +49,7 @@ pass_baton <- function(baton, content = list(), relocate) {
   # Check if pass complete
   if(baton$metadata$pass_complete) stop('Baton pass completed, iterate on top of this relay by starting with `grab_baton()` again.')
   if(!is.list(content)) stop('`content` parameter must be a list.')
-  if(length(locate_batons(suppress_messages = TRUE)>1)) warning('Multiple baton objects in environment, be careful of the order they are passed.\n')
+  if(length(locate_batons(suppress_messages = TRUE))>1) warning('Multiple baton objects in environment, be careful of the order they are passed.\n')
 
   # Validate
   validate_baton(baton)
@@ -113,7 +113,7 @@ grab_baton <- function(baton, loc = NULL) {
     baton <- convert_yml2baton(loc)
   }
 
-  if(length(locate_batons(suppress_messages = TRUE)>1)) warning('Multiple baton objects in environment, be careful of the order they are passed.\n')
+  if(length(locate_batons(suppress_messages = TRUE))>1) warning('Multiple baton objects in environment, be careful of the order they are passed.\n')
 
   # Validate
   validate_baton(baton)

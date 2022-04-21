@@ -49,7 +49,7 @@ locate_batons <- function(loc = .GlobalEnv, suppress_messages = FALSE, ...){
 
     if(!suppress_messages) {message('Environment variable detected, searching that location in R.')}
     l_objs <- ls(envir = loc)
-    batons <- l_objs[sapply(l_objs, function(x) inherits(get(x), 'baton'))]
+    batons <- l_objs[vapply(l_objs, function(x) {inherits(get(x), 'baton') }, logical(1), USE.NAMES = F)]
     if(!suppress_messages) {
       if(length(batons) > 0) {
         writeLines(strwrap(paste0('The following batons are in the selected environment: ', paste0(batons, collapse = ', '))))
