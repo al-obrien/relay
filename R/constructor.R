@@ -11,6 +11,7 @@
 #'    \item id: unique ID of baton based upon time stamp and random numbers.
 #'    \item relay_start: time stamp when baton first created (matched ID).
 #'    \item relay_finish: time the baton was last passed (will not be populated if in middle of pass).
+#'    \item all_grabs: time stamps for all grabs or intercepts that occurred (excludes initial creation time).
 #'    \item all_passes: time stamps for all completed passes.
 #'    \item pass_complete: whether or not the baton completed its latest pass.
 #'    \item passes_completed: the number of successful passes completed.
@@ -54,6 +55,7 @@ create_baton <- function(content = list(), loc = NULL, auto_assign = FALSE, envi
   baton <- structure(list(metadata = list(id = id,
                                           relay_start = format(start, '%Y-%m-%d %H-%M-%S'),
                                           relay_finish = NA,
+                                          all_grabs = NULL,
                                           all_passes = NULL,
                                           pass_complete = FALSE,
                                           passes_completed = 0,

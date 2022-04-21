@@ -11,6 +11,7 @@ batch_load(
   haven_arg = list(),
   readxl_arg = list(),
   csv_arg = list(),
+  fst_arg = list(),
   rds_arg = list(),
   readr = TRUE
 )
@@ -22,7 +23,7 @@ batch_load(
 
 \item{env}{R environment to assign data to; default set to \code{.GlobalEnv}.}
 
-\item{haven_arg, readxl_arg, csv_arg, rds_arg}{additional parameters passed to load functions depending on file extension.}
+\item{haven_arg, readxl_arg, csv_arg, fst_arg, rds_arg}{additional parameters passed to load functions depending on file extension.}
 
 \item{readr}{boolean value to determine if \code{\link[readr]{read_csv}} is used in preference to \code{\link[utils]{read.csv}}.}
 }

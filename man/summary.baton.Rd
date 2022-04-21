@@ -4,7 +4,7 @@
 \alias{summary.baton}
 \title{Summarize batons}
 \usage{
-\method{summary}{baton}(object, ...)
+\method{summary}{baton}(object, include_contents = TRUE, ...)
 }
 \arguments{
 \item{object}{R object of S3 class, created by \code{\link{create_baton}}.}

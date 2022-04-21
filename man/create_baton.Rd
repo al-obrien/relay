@@ -42,12 +42,15 @@ The metadata of a bundle includes the following:
    \item id: unique ID of baton based upon time stamp and random numbers.
    \item relay_start: time stamp when baton first created (matched ID).
    \item relay_finish: time the baton was last passed (will not be populated if in middle of pass).
+   \item all_grabs: time stamps for all grabs or intercepts that occurred (excludes initial creation time).
    \item all_passes: time stamps for all completed passes.
    \item pass_complete: whether or not the baton completed its latest pass.
    \item passes_completed: the number of successful passes completed.
    \item location: where the baton YAML file has been saved.
    \item dropped: boolean value of whether the baton has been dropped, signalling and end to the relay.
 }
+
+The logbook operates with \code{\link{write_logbook}} and \code{\link{read_logbook}}, which help track the baton without having to write contents or update the metadata.
 }
 \note{
 Although some generics (\code{\link{summary.baton}}) are used in \{relay\}, most functions just check for the class and do not proceed unless

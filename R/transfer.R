@@ -125,6 +125,7 @@ grab_baton <- function(baton, loc = NULL) {
   # Update metadata
   baton$metadata$relay_finish <- NA
   baton$metadata$pass_complete <- FALSE
+  baton$metadata$all_grabs <- c(baton$metadata$all_grabs, format(Sys.time(), '%Y-%m-%d %H-%M-%S'))
 
   # Check if relocation needed
   if(!is.null(loc) && normalizePath(baton$metadata$location, mustWork = FALSE) != normalizePath(loc, mustWork = FALSE)) {
@@ -259,6 +260,7 @@ intercept_baton <- function(baton, loc = NULL, reset_only = FALSE, env = .Global
   } else {
     baton$metadata$relay_finish <- NA
     baton$metadata$pass_complete <- FALSE
+    baton$metadata$all_grabs <- c(baton$metadata$all_grabs, format(Sys.time(), '%Y-%m-%d %H-%M-%S'))
     convert_baton2yml(baton, write = TRUE)
 
     # Attempt cleanup
