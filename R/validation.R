@@ -6,7 +6,7 @@
 validate_baton <- function(baton) {
   if(!inherits(baton, 'baton')) stop('Class is not of type "baton"')
 
-  if(!setequal(c('id', 'relay_start', 'relay_finish', 'all_grabs', 'all_passes', 'pass_complete', 'passes_completed', 'location', 'dropped'), names(baton$metadata))) {
+  if(!setequal(c('id', 'referee', 'relay_start', 'relay_finish', 'all_grabs', 'all_passes', 'pass_complete', 'passes_completed', 'location', 'dropped'), names(baton$metadata))) {
     stop('Metadata is missing from baton; ensure a baton is passed to this function.')
   }
 }

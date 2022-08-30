@@ -9,6 +9,7 @@
 #' The metadata of a bundle includes the following:
 #' \enumerate{
 #'    \item id: unique ID of baton based upon time stamp and random numbers.
+#'    \item referee: defines the threshold of content to write to the logbook, 'TRACE' is the lowest and the default.
 #'    \item relay_start: time stamp when baton first created (matched ID).
 #'    \item relay_finish: time the baton was last passed (will not be populated if in middle of pass).
 #'    \item all_grabs: time stamps for all grabs or intercepts that occurred (excludes initial creation time).
@@ -53,6 +54,7 @@ create_baton <- function(content = list(), loc = NULL, auto_assign = FALSE, envi
   loc <- file.path(loc, paste0('_baton-', id, '.yml'))
 
   baton <- structure(list(metadata = list(id = id,
+                                          referee = 'TRACE',
                                           relay_start = format(start, '%Y-%m-%d %H-%M-%S'),
                                           relay_finish = NA,
                                           all_grabs = NULL,

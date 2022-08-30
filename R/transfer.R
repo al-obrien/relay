@@ -341,9 +341,20 @@ write_logbook <- function(baton, msg, msg_type = 'MESSAGE', trunc_long = TRUE, s
 
   btn_name <- deparse(substitute(baton))
 
-  msg_types <- list('TRACE' = 1, 'MESSAGE' = 2, 'WARNING' = 3, 'ERROR' = 4)
+  msg_types <- list('TRACE' = 1, 'DEBUG' = 2, 'MESSAGE' = 3, 'WARNING' = 4, 'ERROR' = 5)
   msg_type <- toupper(msg_type)
   msg_type <- match.arg(msg_type, choices = names(msg_types), several.ok = FALSE)
+
+  # Exit early if not right msg threshold...
+  thresh_n <- match(baton$metadata$referee, names(msg_types))
+  msg_n <- match(msg_type, names(msg_types))
+  if (msg_n < thresh_n) {
+    if(autoassign){
+      return(invisible(NULL))
+    } else {
+      return(invisible(baton))
+    }
+  }
 
   if(trunc_long) {
     if(nchar(msg) > 256) {
@@ -390,5 +401,52 @@ read_logbook <- function(baton, loc = NULL, as.list = FALSE) {
   if(as.list) {
     return(as.list(baton$logbook))
   } else baton$logbook
+
+}
+
+
+#' Set a baton's referee
+#'
+#' \code{set_referee} is a helper function to set the 'referee' of the baton; this controls what threshold of content is written to the logbook. The
+#' updated metadata will occur both in the source YAML as well as the R object for paired consistency.
+#'
+#' @param baton R object of S3 class, created by \code{\link{create_baton}}.
+#' @param threshold character value for the minimum threshold for logging to occur (e.g. 'TRACE', 'DEBUG', 'MESSAGE', 'WARNING', 'ERROR').
+#' @param suppressWarnings boolean value to determine if warning messages upon YAML write are ignored.
+#' @param autoassign boolean value to determine if the passed baton is also refreshed automatically. Recommended as TRUE to avoid having to do manual assignment to provided baton.
+#' @param envir Environment where baton exists, default set to .GlobalEnv, only needed when autoassign is TRUE. If deploying on RStudio Connect, may require using \code{knitr::knit_global()}.
+#' @param ... Additional parameters passed to \code{assign}
+#'
+#' @return S3 class object.
+#' @export
+#' @examples
+#' \dontrun{
+#' my_baton <- create_baton()
+#' set_referee(my_baton, 'MESSAGE')
+#' write_logbook(my_baton, 'A super important message')
+#' set_referee(my_baton, 'ERROR')
+#' write_logbook(my_baton, 'This message ignored b/c the referee cares not')
+#' read_logbook(my_baton)
+#' }
+set_referee <- function(baton, threshold = 'TRACE', suppressWarnings = TRUE, autoassign = TRUE, envir = .GlobalEnv, ...) {
+
+  if(baton$metadata$pass_complete) stop('Baton pass complete, cannot write to logbook unless the relay is in process. Try running `grab_baton()`\n')
+
+  btn_name <- deparse(substitute(baton))
+
+  msg_types <- list('TRACE' = 1, 'DEBUG' = 2, 'MESSAGE' = 3, 'WARNING' = 4, 'ERROR' = 5)
+  threshold <- toupper(threshold)
+  threshold <- match.arg(threshold, choices = names(msg_types), several.ok = FALSE)
+
+  # Update metadata in source YAML
+  baton$metadata$referee <- threshold
+  convert_baton2yml(baton, write = TRUE)
+
+  # Return value to env
+  if(autoassign){
+    assign(btn_name, baton, envir = envir, ...) #TODO use locate_batons? or mget loop?
+  } else {
+    invisible(baton)
+  }
 
 }

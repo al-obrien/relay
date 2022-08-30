@@ -40,6 +40,7 @@ to the R environment in case that is easier to remember.
 The metadata of a bundle includes the following:
 \enumerate{
    \item id: unique ID of baton based upon time stamp and random numbers.
+   \item referee: defines the threshold of content to write to the logbook, 'TRACE' is the lowest and the default.
    \item relay_start: time stamp when baton first created (matched ID).
    \item relay_finish: time the baton was last passed (will not be populated if in middle of pass).
    \item all_grabs: time stamps for all grabs or intercepts that occurred (excludes initial creation time).
