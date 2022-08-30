@@ -406,3 +406,65 @@ read_metadata <- function(baton, loc = NULL, subset = NULL) {
     return(baton$metadata)
   }
 }
+
+#' Append baton content
+#'
+#' Append content of baton instead of replacing the list content via \code{modifyList()}. Typically this can be done right at the
+#' time when passing the baton, sent to the `content` parameter. Using this function should help ease the process of replacing items
+#' nested within the list, though it is possible to do this manually too. It is recommended to always review the new content after
+#' appending prior to passing the baton to ensure the process occurred as expected. If vector lengths or depths are not exact, there
+#' could be unexpected entries.
+#'
+#' @param baton R object of S3 class, created by \code{\link{create_baton}}.
+#' @param content_name Character vector in order of nested list component of existing baton content.
+#' @param new_content Named list for new content to append to existing baton content, without replacing.
+#' @param all_content Boolean, to decide if all content is returned or just the sections modified.
+#'
+#' @return List of the new content that should be appended when passing the baton
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming there is an existing baton with content under 'data'...
+#'
+#' # Create some content to put under data, and already exists to append...
+#' baton_content <- list('time_created' = Sys.time()))
+#'
+#' # Pass baton and do appending at same time
+#' baton_example <- pass_baton(baton_example, content = append_content(baton_example, 'data', baton_content))
+#'
+#' # If need to append as well as add new content before passing, combine the append_content to another list
+#' new_content <- append(append_content(baton_example, 'data', baton_content), list('new_content' = 'This is new content'))
+#' baton_example <- pass_baton(baton_example, content = new_content)
+#' }
+#'
+#' @export
+append_content <- function(baton, content_name = NULL, new_content, all_content = TRUE){
+  #TODO add more checks for new_content aligning to plucked... better way to align the content to append and where to slice down to...
+  #TODO add functionality to replace entire content at once, not a subset list (i.e. what should it do with NULL default?)
+
+  validate_baton(baton)
+  if(!is.list(new_content)) stop('Parameter `new_content` must be a named list.')
+  if(any(is.null(names(new_content)))) stop('Parameter `new_content` must be a named list.')
+  if(any(is.null(names(baton$content)))) stop('Baton content must be a named list.') # This should never trigger...
+
+  # Operations to append to existing list as by content name subset
+  existing_content <- list(baton$content)
+  content_subset <- as.list(content_name)
+  plucked_content <- do.call(purrr::pluck, append(existing_content, content_subset)) # do.call necessary?
+
+  # If still a list, then can append new_content as a list still...
+  if(inherits(plucked_content, 'list')) {
+    appended_content <- purrr::map2(plucked_content, new_content, append)
+  } else {
+    appended_content <- append(plucked_content, unlist(new_content, use.names = FALSE))
+  }
+
+  # Replace appended content at source
+  new_content <- purrr::assign_in(baton$content, content_subset, appended_content)
+
+  # Return full content list
+  if(all_content) {
+    return(new_content)
+  } else {
+    return(do.call(purrr::pluck, append(list(new_content), content_subset)))
+  }
