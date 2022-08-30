@@ -9,6 +9,10 @@
 #' @param envir environment to clear \emph{baton} objects from the active R session; default set to \code{.GlobalEnv}.
 #' @param ... parameters passed to \code{\link{list.files}}
 #'
+#' @examples
+#' \dontrun{
+#' clear_batons(loc = '/tmp', recursive = TRUE)
+#' }
 #' @export
 clear_batons <- function(baton, loc = NULL, envir = .GlobalEnv, ...) {
 
@@ -468,3 +472,4 @@ append_content <- function(baton, content_name = NULL, new_content, all_content 
   } else {
     return(do.call(purrr::pluck, append(list(new_content), content_subset)))
   }
+}

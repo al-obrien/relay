@@ -18,3 +18,8 @@ clear_batons(baton, loc = NULL, envir = .GlobalEnv, ...)
 \description{
 Clear batons from a directory (YAML files) and/or R environment.
 }
+\examples{
+\dontrun{
+clear_batons(loc = '/tmp', recursive = TRUE)
+}
+}
