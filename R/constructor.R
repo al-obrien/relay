@@ -111,7 +111,7 @@ create_baton <- function(content = list(), loc = NULL, auto_assign = FALSE, envi
 #' create_bundle(my_baton, dir = '/path/to/relay/raw_bundle',
 #'               tree = c('raw', 'processed', 'metadata', 'output', '/raw/sub-raw'))
 #' }
-create_bundle <- function(baton, dir, tree, tag = '_bundle-', mode, ...){
+create_bundle <- function(baton, dir, tree = NULL, tag = '_bundle-', mode, ...){
 
   validate_baton(baton)
 
