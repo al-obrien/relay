@@ -542,7 +542,7 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
 #' @param separate Boolean, determine if pass numbers should be on separate lines.
 #' @param include_logs Boolean, include or exclude log times.
 #' @param x_label_length Numeric value, for how many x-axis ticks to draw.
-#' @param point_offset Numeric value, proportion for how far to offset points from lines.
+#' @param point_offset Numeric value, absolute value for how far to offset points from lines.
 #' @param ... Additional parameters to plotting features (not in use yet...)
 #' @export
 #' @examples
@@ -617,8 +617,8 @@ plot.baton <- function(baton,
     segments(x0 = pass_data$x0, x1 = pass_data$x1,
              y0 = 1, y1 = 1,
              col = 'grey50', lty = 1)
-    points(pass_data$x0, rep(1, length(pass_vector)) * (1 + point_offset), pch = 25, col= 'green', bg = 'green')
-    points(pass_data$x1, rep(1, length(pass_vector)) * (1 - point_offset), pch = 24, col= 'red', bg = 'red')
+    points(pass_data$x0, rep(1, length(pass_vector)) + point_offset, pch = 25, col= 'green', bg = 'green')
+    points(pass_data$x1, rep(1, length(pass_vector)) - point_offset, pch = 24, col= 'red', bg = 'red')
 
   } else {
 
@@ -644,8 +644,8 @@ plot.baton <- function(baton,
              y0 = pass_data$y0,
              y1= pass_data$y0,
              col = 'grey50', lty = 1)
-    points(pass_data$x0, pass_data$y0 * (1 + point_offset), pch = 25, col= 'green', bg = 'green')
-    points(pass_data$x1, pass_data$y0 * (1 - point_offset), pch = 24, col= 'red', bg = 'red')
+    points(pass_data$x0, pass_data$y0 + point_offset, pch = 25, col= 'green', bg = 'green')
+    points(pass_data$x1, pass_data$y0 - point_offset, pch = 24, col= 'red', bg = 'red')
 
   }
 
