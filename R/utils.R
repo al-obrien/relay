@@ -539,6 +539,7 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
 #'
 #' @param baton S3 object of class 'baton'.
 #' @param relative_time Boolean, should time be relative to start or absolute (in seconds).
+#' @param relative_units Default 'secs' (passed to `difftime`).
 #' @param separate Boolean, determine if pass numbers should be on separate lines.
 #' @param include_logs Boolean, include or exclude log times.
 #' @param x_label_length Numeric value, for how many x-axis ticks to draw.
@@ -561,6 +562,7 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
 #' }
 plot.baton <- function(baton,
                        relative_time = TRUE,
+                       relative_units = 'secs',
                        separate = FALSE,
                        include_logs = FALSE,
                        x_label_length = 3,
@@ -586,11 +588,11 @@ plot.baton <- function(baton,
     }
 
   if(relative_time) {
-    max_time <- max_time - min_time
-    pass_times <- pass_times - min_time
-    grab_times <- grab_times - min_time
+    max_time <- difftime(max_time, min_time, units = relative_units)
+    pass_times <- difftime(pass_times, min_time, units = relative_units)
+    grab_times <- difftime(grab_times, min_time, units = relative_units)
     min_time_abs <- min_time
-    min_time <- min_time - min_time
+    min_time <- difftime(min_time, min_time, units = relative_units)
   }
 
   pass_data <- data.frame(x0 = grab_times, x1 = pass_times, y0 = pass_vector)

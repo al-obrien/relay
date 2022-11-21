@@ -39,7 +39,7 @@ remotes::install_github('al-obrien/relay')
 
 ### First Process
 Create the baton, and after the workflow process, the baton_content will check to see if specific datasets are present and the time they were created when the baton was in the relay.
-```{r eval=FALSE}
+```{r eval = FALSE}
 # Load
 library(relay)
 library(purrr)
@@ -82,5 +82,25 @@ stopifnot(all(my_baton$content$datasets$existence),
 # ..
 # ...  
 
+```
+
+## Plot a timelapse of the baton
+```{r, eval = FALSE}
+plot(my_baton)
+```
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+library(relay)
+
+# Fake baton...
+my_baton <- create_baton()
+Sys.sleep(2)
+my_baton <- pass_baton(my_baton)
+Sys.sleep(2)
+my_baton <- grab_baton(my_baton)
+Sys.sleep(3)
+my_baton <- pass_baton(my_baton)
+
+plot(my_baton)
 ```
 

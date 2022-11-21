@@ -170,3 +170,11 @@ stopifnot(all(my_baton$content$datasets$existence),
 # ..
 # ...  
 ```
+
+## Plot a timelapse of the baton
+
+``` r
+plot(my_baton)
+```
+
+<img src="README_files/figure-gfm/unnamed-chunk-5-1.png" width="100%" />
