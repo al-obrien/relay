@@ -473,3 +473,229 @@ append_content <- function(baton, content_name = NULL, new_content, all_content 
     return(do.call(purrr::pluck, append(list(new_content), content_subset)))
   }
 }
+
+#' Parse the baton's logbook for details of interest
+#'
+#' Will parse based on various REGEX capturing groups:
+#'
+#' \itemize{
+#'   \item{"Group 1"}{entire content}
+#'   \item{"Group 2"}{pass number}
+#'   \item{"Group 3"}{DateTime}
+#'   \item{"Group 4"}{Date}
+#'   \item{"Group 5"}{Time}
+#'   \item{"Group 6"}{message type}
+#'   \item{"Group 7"}{message content}
+#' }
+#'
+#' @param baton_logbook A baton or a vector containing a baton's logbook details.
+#' @param target Character vector for parsing target in logbook (one of: 'PASS', 'PASS_NUMBER', 'DATETIME', 'DATE' 'TIME', , 'MESSAGE_TYPE', 'MESSAGE').
+#' @export
+parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE', 'TIME', 'DATETIME', 'MESSAGE_TYPE', 'MESSAGE')) {
+
+  # If baton based instead of logbook vector, parse it...
+  if(inherits(baton_logbook, 'baton')) {
+    logbook_content <- relay::read_logbook(test_baton, as.list = FALSE)
+  } else {
+    logbook_content <- baton_logbook
+  }
+
+  # Determine which to return
+  target <- match.arg(target,
+                      choices = c('PASS', 'PASS_NUMBER', 'DATE', 'TIME', 'DATETIME', 'MESSAGE_TYPE', 'MESSAGE'),
+                      several.ok = TRUE)
+
+  pattern_search <- '^((Pass\\s\\[\\d\\])\\s(([\\d]{4}-[\\d]{2}-[\\d]{2})\\s([\\d]{2}:[\\d]{2}:[\\d]{2}))\\s(\\[[\\w]*\\]))\\s(.*)$'
+
+  # Predefine vector to return
+  return_list <- vector(mode = 'list', length = length(target))
+  return_list <- setNames(return_list, target)
+
+  logbook_contents <- read_logbook(test_baton, as.list = FALSE)
+
+  # Apply content to each part of list based on extract method
+  for(i in target){
+    temp <- switch(i,
+                   'PASS' = {gsub(pattern_search, '\\2', logbook_content, perl = TRUE)},
+                   'PASS_NUMBER' = {gsub(pattern = '^Pass\\s\\[(\\d)\\]$', '\\1', x = gsub(pattern_search, '\\2', logbook_content, perl = TRUE))},
+                   'DATETIME' = {gsub(pattern_search, '\\3', logbook_content, perl = TRUE)},
+                   'DATE' = {gsub(pattern_search, '\\4', logbook_content, perl = TRUE)},
+                   'TIME' = {gsub(pattern_search, '\\5', logbook_content, perl = TRUE)},
+                   'MESSAGE_TYPE' = {gsub(pattern_search, '\\6', logbook_content, perl = TRUE)},
+                   'MESSAGE' = {gsub(pattern_search, '\\7', logbook_content, perl = TRUE)}
+                   )
+    return_list[[i]] <- temp
+  }
+
+  return(return_list)
+
+}
+
+
+#' Plot baton metadata
+#'
+#' Will parse the baton metadata and logbook to provide graphical aides in determining when
+#' pass, grab, and logging operations occured.
+#'
+#' @param baton S3 object of class 'baton'.
+#' @param relative_time Boolean, should time be relative to start or absolute (in seconds).
+#' @param separate Boolean, determine if pass numbers should be on separate lines.
+#' @param include_logs Boolean, include or exclude log times.
+#' @param point_offset Numeric value, proportion for how far to offset points from lines.
+#' @param x_label_length Numeric value, for how many x-axis ticks to draw.
+#' @param ... Additional parameters to plotting features (not in use yet...)
+#'
+#' @examples
+#' \dontrun{
+#' library(relay)
+#'
+#' test_baton <- create_baton()
+#' write_logbook(test_baton, 'Test message 1')
+#' test_baton <- pass_baton(test_baton)
+#' write_logbook(test_baton, 'Test message 2')
+#' test_baton <- grab_baton(test_baton)
+#'
+#' plot(test_baton)
+#' plot(test_baton, relative_time =  TRUE, separate = TRUE, include_logs = TRUE)
+#' }
+plot.baton <- function(baton,
+                       relative_time = TRUE,
+                       separate = FALSE,
+                       include_logs = FALSE,
+                       x_label_length = 3,
+                       point_offset = 0.02,
+                       ...) {
+
+  # Date formats for passes
+  format_meta <- '%Y-%m-%d %H-%M-%S'
+  format_logs <- '%Y-%m-%d %H:%M:%S'
+
+  # Times of passes, create dataset
+  pass_vector <- 0:(read_metadata(baton, subset = 'passes_completed')[[1]] - 1)
+  min_time <- as.POSIXct(read_metadata(baton, subset = 'relay_start')[[1]], format = format_meta)
+  max_time <- as.POSIXct(read_metadata(baton, subset = 'relay_finish')[[1]], format = format_meta)
+  pass_times <- as.POSIXct(read_metadata(baton, subset = 'all_passes')[[1]], format = format_meta)
+  grab_times <- c(min_time, as.POSIXct(read_metadata(baton, subset = 'all_grabs')[[1]], format = format_meta))
+
+  if(relative_time) {
+    max_time <- max_time - min_time
+    pass_times <- pass_times - min_time
+    grab_times <- grab_times - min_time
+    min_time_abs <- min_time
+    min_time <- min_time - min_time
+  }
+
+  pass_data <- data.frame(x0 = grab_times, x1 = pass_times, y0 = pass_vector)
+
+  if(!separate) {
+
+    # Initialize (plot all on 1 Y axis)
+    plot.new()
+    plot.window(xlim = c(min_time, max_time), ylim = range(0.5, 1.5))
+
+    # Axes and labels
+    x_labs <- seq(min_time, max_time, length.out = x_label_length)
+    title(ylab = 'Pass Summary', main = 'Baton Timelapse Summary')
+
+    if(relative_time) {
+      axis(1, x_labs, las = 1, cex.axis = .75, font = 1)
+      title(xlab = 'Time (seconds)')
+    } else {
+      axis(1, x_labs, labels = format(x_labs, "%b %d '%y \n(%H:%M)"), las = 1, cex.axis = .75, font = 1)
+      title(xlab = 'Date (Time)')
+    }
+
+    # Add plots
+    segments(x0 = pass_data$x0, x1 = pass_data$x1,
+             y0 = 1, y1 = 1,
+             col = 'grey50', lty = 1)
+    points(pass_data$x0, rep(1, length(pass_vector)) * (1 + point_offset), pch = 25, col= 'green', bg = 'green')
+    points(pass_data$x1, rep(1, length(pass_vector)) * (1 - point_offset), pch = 24, col= 'red', bg = 'red')
+
+  } else {
+
+    # Initialize
+    plot.new()
+    plot.window(xlim = c(min_time, max_time), ylim = range(pass_vector))
+
+    # Axes and labels
+    x_labs <- seq(min_time, max_time, length.out = x_label_length)
+    axis(2, at = pass_data$y0,las = 2)
+    title(ylab = 'Pass Number', main = 'Baton Timelapse Summary')
+
+    if(relative_time) {
+      axis(1, x_labs, las = 1, cex.axis = .75, font = 1)
+      title(xlab = 'Time (seconds)')
+    } else {
+      axis(1, x_labs, labels = format(x_labs, "%b %d '%y \n(%H:%M)"), las = 1, cex.axis = .75, font = 1)
+      title(xlab = 'Date (Time)')
+    }
+
+    segments(x0 = pass_data$x0,
+             x1 = pass_data$x1,
+             y0 = pass_data$y0,
+             y1= pass_data$y0,
+             col = 'grey50', lty = 1)
+    points(pass_data$x0, pass_data$y0 * (1 + point_offset), pch = 25, col= 'green', bg = 'green')
+    points(pass_data$x1, pass_data$y0 * (1 - point_offset), pch = 24, col= 'red', bg = 'red')
+
+  }
+
+  # --------------------------- #
+  # Log additions
+  # --------------------------- #
+
+  if(include_logs) {
+
+    # Date formats for logs
+    format_logs <- '%Y-%m-%d %H:%M:%S'
+
+    # Define helper for log colors
+    log_cols <- function(vec){
+      ifelse(vec == '[TRACE]', 'aquamarine',
+             ifelse(vec == '[DEBUG]', 'maroon',
+                    ifelse(vec == '[MESSAGE]', 'orange2',
+                           ifelse(vec == '[WARNING]', 'yellow1',
+                                  ifelse(vec == '[ERROR]', 'red2', NA_character_)
+                           )
+                    )
+             )
+      )
+    }
+
+    if(relative_time) {
+      # Times of logs, create dataset
+      log_data <- data.frame(x = as.POSIXct(parse_logbook(test_baton, 'DATETIME')[[1]], format = format_logs) - min_time_abs,
+                             y = as.integer(parse_logbook(test_baton, 'PASS_NUMBER')[[1]]),
+                             msg_type = parse_logbook(test_baton, 'MESSAGE_TYPE')[[1]])
+
+    } else {
+      # Times of logs, create dataset
+      log_data <- data.frame(x = as.POSIXct(parse_logbook(test_baton, 'DATETIME')[[1]], format = format_logs),
+                             y = as.integer(parse_logbook(test_baton, 'PASS_NUMBER')[[1]]),
+                             msg_type = parse_logbook(test_baton, 'MESSAGE_TYPE')[[1]])
+    }
+
+    # Add log times
+    points(log_data$x, log_data$y, pch = '|', col = log_cols(log_data$msg_type), cex = 1.25)
+
+    # Add legend
+    legend(x = "topleft",
+           legend = c('Start/Grab', 'End/Pass', 'Log: TRACE', 'Log: DEBUG', 'Log: MESSAGE',
+                      'Log: WARNING', 'Log: ERROR'),
+           col = c('green', 'red', 'aquamarine', 'maroon', 'orange2', 'yellow1', 'red2'),
+           pch = c(25, 24, rep(124, 5)),
+           pt.bg = c('green', 'red', rep(NA,5)),
+           bty ='n')
+
+  } else {
+
+    # Add legend
+    legend(x = "topleft",
+           legend = c('Start/Grab', 'End/Pass'),
+           col = c('green', 'red'),
+           pch = c(25,24),
+           pt.bg = c('green', 'red'),
+           bty ='n')
+  }
+}
