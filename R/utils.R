@@ -541,8 +541,8 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
 #' @param relative_time Boolean, should time be relative to start or absolute (in seconds).
 #' @param separate Boolean, determine if pass numbers should be on separate lines.
 #' @param include_logs Boolean, include or exclude log times.
-#' @param point_offset Numeric value, proportion for how far to offset points from lines.
 #' @param x_label_length Numeric value, for how many x-axis ticks to draw.
+#' @param point_offset Numeric value, proportion for how far to offset points from lines.
 #' @param ... Additional parameters to plotting features (not in use yet...)
 #'
 #' @examples

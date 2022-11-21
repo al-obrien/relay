@@ -4,7 +4,7 @@
 \alias{create_bundle}
 \title{Create a bundle}
 \usage{
-create_bundle(baton, dir, tree, tag = "_bundle-", mode, ...)
+create_bundle(baton, dir, tree = NULL, tag = "_bundle-", mode, ...)
 }
 \arguments{
 \item{baton}{R object of S3 class, created by \code{\link{create_baton}}.}
