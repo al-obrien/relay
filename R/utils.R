@@ -552,8 +552,9 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
 #' test_baton <- create_baton()
 #' write_logbook(test_baton, 'Test message 1')
 #' test_baton <- pass_baton(test_baton)
-#' write_logbook(test_baton, 'Test message 2')
 #' test_baton <- grab_baton(test_baton)
+#' write_logbook(test_baton, 'Test message 2')
+#' test_baton <- pass_baton(test_baton)
 #'
 #' plot(test_baton)
 #' plot(test_baton, relative_time =  TRUE, separate = TRUE, include_logs = TRUE)
@@ -576,6 +577,13 @@ plot.baton <- function(baton,
   max_time <- as.POSIXct(read_metadata(baton, subset = 'relay_finish')[[1]], format = format_meta)
   pass_times <- as.POSIXct(read_metadata(baton, subset = 'all_passes')[[1]], format = format_meta)
   grab_times <- c(min_time, as.POSIXct(read_metadata(baton, subset = 'all_grabs')[[1]], format = format_meta))
+
+  # Correction for if did not complete final pass...
+  if(!read_metadata(baton, subset = 'pass_complete')[[1]]) {
+    pass_times <- c(pass_times, NA)
+    pass_vector <- c(pass_vector, max(pass_vector))
+    max_time <- max(pass_times, grab_times, na.rm = TRUE)
+    }
 
   if(relative_time) {
     max_time <- max_time - min_time

@@ -1,7 +1,7 @@
 Package: relay
 Type: Package
 Title: Flexible workflow tracking
-Version: 0.4.0
+Version: 0.4.1
 Author: person('Allen', 'OBrien', email= 'allen.g.obrien@gmail.com', role = c('aut', 'cre'))
 Maintainer: <allen.g.obrien@gmail.com>
 Description: Create objects and YAML configuration files to track progress, status, and completion of workflows in a flexible way.
