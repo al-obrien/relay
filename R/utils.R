@@ -505,7 +505,7 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
                       choices = c('PASS', 'PASS_NUMBER', 'DATE', 'TIME', 'DATETIME', 'MESSAGE_TYPE', 'MESSAGE'),
                       several.ok = TRUE)
 
-  pattern_search <- '^((Pass\\s\\[\\d\\])\\s(([\\d]{4}-[\\d]{2}-[\\d]{2})\\s([\\d]{2}:[\\d]{2}:[\\d]{2}))\\s(\\[[\\w]*\\]))\\s(.*)$'
+  pattern_search <- '^((Pass\\s\\[\\d\\])\\s(([\\d]{4}-[\\d]{2}-[\\d]{2})\\s([\\d]{2}:[\\d]{2}:[\\d]{2}))\\s(\\[[\\w]*\\]))\\s((.|\\n)*)$'
 
   # Predefine vector to return
   return_list <- vector(mode = 'list', length = length(target))
