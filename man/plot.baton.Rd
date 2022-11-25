@@ -7,6 +7,7 @@
 \method{plot}{baton}(
   baton,
   relative_time = TRUE,
+  relative_units = "secs",
   separate = FALSE,
   include_logs = FALSE,
   x_label_length = 3,
@@ -19,13 +20,15 @@
 
 \item{relative_time}{Boolean, should time be relative to start or absolute (in seconds).}
 
+\item{relative_units}{Default 'secs' (passed to `difftime`).}
+
 \item{separate}{Boolean, determine if pass numbers should be on separate lines.}
 
 \item{include_logs}{Boolean, include or exclude log times.}
 
 \item{x_label_length}{Numeric value, for how many x-axis ticks to draw.}
 
-\item{point_offset}{Numeric value, proportion for how far to offset points from lines.}
+\item{point_offset}{Numeric value, absolute value for how far to offset points from lines.}
 
 \item{...}{Additional parameters to plotting features (not in use yet...)}
 }
