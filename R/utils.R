@@ -495,7 +495,7 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
 
   # If baton based instead of logbook vector, parse it...
   if(inherits(baton_logbook, 'baton')) {
-    logbook_content <- relay::read_logbook(test_baton, as.list = FALSE)
+    logbook_content <- relay::read_logbook(baton_logbook, as.list = FALSE)
   } else {
     logbook_content <- baton_logbook
   }
@@ -510,8 +510,6 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
   # Predefine vector to return
   return_list <- vector(mode = 'list', length = length(target))
   return_list <- setNames(return_list, target)
-
-  logbook_contents <- read_logbook(test_baton, as.list = FALSE)
 
   # Apply content to each part of list based on extract method
   for(i in target){
@@ -675,15 +673,15 @@ plot.baton <- function(baton,
 
     if(relative_time) {
       # Times of logs, create dataset
-      log_data <- data.frame(x = as.POSIXct(parse_logbook(test_baton, 'DATETIME')[[1]], format = format_logs) - min_time_abs,
-                             y = as.integer(parse_logbook(test_baton, 'PASS_NUMBER')[[1]]),
-                             msg_type = parse_logbook(test_baton, 'MESSAGE_TYPE')[[1]])
+      log_data <- data.frame(x = as.POSIXct(parse_logbook(baton, 'DATETIME')[[1]], format = format_logs) - min_time_abs,
+                             y = as.integer(parse_logbook(baton, 'PASS_NUMBER')[[1]]),
+                             msg_type = parse_logbook(baton, 'MESSAGE_TYPE')[[1]])
 
     } else {
       # Times of logs, create dataset
-      log_data <- data.frame(x = as.POSIXct(parse_logbook(test_baton, 'DATETIME')[[1]], format = format_logs),
-                             y = as.integer(parse_logbook(test_baton, 'PASS_NUMBER')[[1]]),
-                             msg_type = parse_logbook(test_baton, 'MESSAGE_TYPE')[[1]])
+      log_data <- data.frame(x = as.POSIXct(parse_logbook(baton, 'DATETIME')[[1]], format = format_logs),
+                             y = as.integer(parse_logbook(baton, 'PASS_NUMBER')[[1]]),
+                             msg_type = parse_logbook(baton, 'MESSAGE_TYPE')[[1]])
     }
 
     # Add log times
