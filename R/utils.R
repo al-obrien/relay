@@ -119,6 +119,16 @@ summary.baton <- function(object, include_contents = TRUE, ...){
   invisible(object)
 }
 
+#' @inherit summary.baton
+#'
+#' @export
+summary.baton_preview <- function(object, include_contents = TRUE, ...){
+  # Convert back just for this...
+  object_baton <- object
+  class(object_baton) <- 'baton'
+  invisible(do.call(summary.baton, list(object = object_baton, include_contents = TRUE, ... = ... )))
+  invisible(object)
+}
 
 #' List all files under directory
 #'
@@ -554,7 +564,7 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
 #' Will parse the baton metadata and logbook to provide graphical aides in determining when
 #' pass, grab, and logging operations occured.
 #'
-#' @param baton S3 object of class 'baton'.
+#' @param baton S3 object of class 'baton', possibly 'baton_preview'.
 #' @param relative_time Boolean, should time be relative to start or absolute (in seconds).
 #' @param relative_units Default 'secs' (passed to `difftime`).
 #' @param separate Boolean, determine if pass numbers should be on separate lines.
@@ -567,6 +577,7 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
 #' \dontrun{
 #' library(relay)
 #'
+#' # Create a new baton
 #' test_baton <- create_baton()
 #' write_logbook(test_baton, 'Test message 1')
 #' test_baton <- pass_baton(test_baton)
@@ -576,6 +587,9 @@ parse_logbook <- function(baton_logbook, target = c('PASS', 'PASS_NUMBER', 'DATE
 #'
 #' plot(test_baton)
 #' plot(test_baton, relative_time =  TRUE, separate = TRUE, include_logs = TRUE)
+#'
+#' # Plot a baton_preview
+#' plot(preview_baton('path/to/baton.yml'))
 #' }
 plot.baton <- function(baton,
                        relative_time = TRUE,
@@ -727,6 +741,34 @@ plot.baton <- function(baton,
   }
 }
 
+#' Plot baton_preview metadata
+#' @inherit plot.baton
+#' @export
+plot.baton_preview <- function(baton,
+                               relative_time = TRUE,
+                               relative_units = 'secs',
+                               separate = FALSE,
+                               include_logs = FALSE,
+                               x_label_length = 3,
+                               point_offset = 0.02,
+                               ...) {
+
+  # Convert back just for this...
+  class(baton) <- 'baton'
+  validate_baton(baton)
+
+  # Pass along to actual plotting...
+  do.call(plot.baton, list(baton = baton,
+                           relative_time = relative_time,
+                           relative_units = relative_units,
+                           separate = separate,
+                           include_logs = include_logs,
+                           x_label_length = x_label_length,
+                           point_offset = point_offset,
+                           ...))
+}
+
+
 #' Check if object is of class baton
 #'
 #' Will check if the object inherits the 'baton' class.
@@ -749,3 +791,4 @@ is.baton <- function(object) {
 is.baton_preview <- function(object) {
   inherits(object, 'baton_preview')
 }
+
