@@ -626,7 +626,7 @@ plot.baton <- function(baton,
 
     if(relative_time) {
       axis(1, x_labs, las = 1, cex.axis = .75, font = 1)
-      title(xlab = 'Time (seconds)')
+      title(xlab = paste0('Time (', relative_units,')'))
     } else {
       axis(1, x_labs, labels = format(x_labs, "%b %d '%y \n(%H:%M)"), las = 1, cex.axis = .75, font = 1)
       title(xlab = 'Date (Time)')
@@ -652,7 +652,7 @@ plot.baton <- function(baton,
 
     if(relative_time) {
       axis(1, x_labs, las = 1, cex.axis = .75, font = 1)
-      title(xlab = 'Time (seconds)')
+      title(xlab = paste0('Time (', relative_units,')'))
     } else {
       axis(1, x_labs, labels = format(x_labs, "%b %d '%y \n(%H:%M)"), las = 1, cex.axis = .75, font = 1)
       title(xlab = 'Date (Time)')
