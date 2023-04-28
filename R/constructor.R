@@ -131,3 +131,25 @@ create_bundle <- function(baton, dir, tree = NULL, tag = '_bundle-', mode, ...){
   return(bundle_path)
 
 }
+
+#' Preview a baton from a YAML file
+#'
+#' \code{preview_baton} accesses the baton YAML file for previewing.
+#'
+#' A previewed version of a baton is restricted and is mainly used for read-only operations such as
+#' \code{\link{summary}} and \code{\link{plot}}.
+#'
+#' @param loc Location of YAML file that was saved from a \emph{baton}.
+#'
+#' @return S3 class object.
+#' @export
+#' @examples
+#' \dontrun{
+#' preview_baton(loc = '/path/to/relay/baton.yml')
+#' }
+preview_baton <- function(loc) {
+  baton <- convert_yml2baton(loc)
+  validate_baton(baton)
+  class(baton) <- 'baton_preview'
+  baton
+}
