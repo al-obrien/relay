@@ -7,7 +7,7 @@
 pass_baton(baton, content = list(), relocate)
 }
 \arguments{
-\item{baton}{R object of S3 class, created by \code{\link{create_baton}}}
+\item{baton}{R object of S3 class, created by \code{\link{create_baton}}.}
 
 \item{content}{a list of custom content that the baton should carry. Populates the YAML.}
 

@@ -2,7 +2,7 @@
 #'
 #' Baton pass operation (write to contents, update metadata, append to YAML)
 #'
-#' @param baton R object of S3 class, created by \code{\link{create_baton}}
+#' @param baton R object of S3 class, created by \code{\link{create_baton}}.
 #' @param content a list of custom content that the baton should carry. Populates the YAML.
 #' @param relocate character vector defining the file path to move the YAML file upon completion of the pass.
 #'
@@ -324,7 +324,7 @@ intercept_baton <- function(baton, loc = NULL, reset_only = FALSE, env = .Global
 #' })
 #' }
 #'
-#' @param baton R object of S3 class, created by \code{\link{create_baton}}
+#' @param baton R object of S3 class, created by \code{\link{create_baton}}.
 #' @param msg Location of YAML file that was saved from a \emph{baton}.
 #' @param msg_type boolean value which will attempt only to reset the \code{pass_complete} status without loading the \emph{baton}.
 #' @param trunc_long boolean value to determine if messages should be truncated at 256 characters.
@@ -410,6 +410,8 @@ read_logbook <- function(baton, loc = NULL, as.list = FALSE) {
 #' \code{set_referee} is a helper function to set the 'referee' of the baton; this controls what threshold of content is written to the logbook. The
 #' updated metadata will occur both in the source YAML as well as the R object for paired consistency.
 #'
+#' The default threshold is set to \code{'TRACE'} and can be overriden directly or by setting the global options via \code{options(relay_referee = 'TRACE')}.
+#'
 #' @param baton R object of S3 class, created by \code{\link{create_baton}}.
 #' @param threshold character value for the minimum threshold for logging to occur (e.g. 'TRACE', 'DEBUG', 'MESSAGE', 'WARNING', 'ERROR').
 #' @param suppressWarnings boolean value to determine if warning messages upon YAML write are ignored.
@@ -428,9 +430,9 @@ read_logbook <- function(baton, loc = NULL, as.list = FALSE) {
 #' write_logbook(my_baton, 'This message ignored b/c the referee cares not')
 #' read_logbook(my_baton)
 #' }
-set_referee <- function(baton, threshold = 'TRACE', suppressWarnings = TRUE, autoassign = TRUE, envir = .GlobalEnv, ...) {
+set_referee <- function(baton, threshold = getOption('relay_referee', default = 'TRACE'), suppressWarnings = TRUE, autoassign = TRUE, envir = .GlobalEnv, ...) {
 
-  if(baton$metadata$pass_complete) stop('Baton pass complete, cannot write to logbook unless the relay is in process. Try running `grab_baton()`\n')
+  if(baton$metadata$pass_complete) stop('Baton pass complete, cannot set referee unless the relay is in process. Try running `grab_baton()`\n')
 
   btn_name <- deparse(substitute(baton))
 
@@ -440,7 +442,16 @@ set_referee <- function(baton, threshold = 'TRACE', suppressWarnings = TRUE, aut
 
   # Update metadata in source YAML
   baton$metadata$referee <- threshold
-  convert_baton2yml(baton, write = TRUE)
+
+  # Attempt to update metadata in source YAML
+  tryCatch({
+    tmp_baton <- convert_yml2baton(baton$metadata$location)
+    tmp_baton$metadata$referee <- threshold
+    convert_baton2yml(tmp_baton, write = TRUE)
+  },
+  error = function(err) {
+    stop('Could not overwrite `referee` for baton YAML file.')
+  })
 
   # Return value to env
   if(autoassign){
@@ -449,4 +460,68 @@ set_referee <- function(baton, threshold = 'TRACE', suppressWarnings = TRUE, aut
     invisible(baton)
   }
 
+}
+
+#' Set a baton's relay type
+#'
+#' \code{set_relay_type} is a helper function to set the 'relay_type' of the baton; this flag can be accessed by the user to help control how batons are accessed.
+#' The updated metadata will occur both in the source YAML as well as the R object for paired consistency. There are three types of relay: 'CANCELLED', 'PRACTICE',
+#' or 'COMPETITION'. The default is 'COMPETITION'. This can be adjusted globally by \code{options(relay_type = "COMPETITION")}
+#'
+#' @param baton R object of S3 class, created by \code{\link{create_baton}}.
+#' @param threshold character value for the type of the baton (e.g. 'CANCELLED', 'PRACTICE', or 'COMPETITION').
+#' @param suppressWarnings boolean value to determine if warning messages upon YAML write are ignored.
+#' @param autoassign boolean value to determine if the passed baton is also refreshed automatically. Recommended as TRUE to avoid having to do manual assignment to provided baton.
+#' @param envir Environment where baton exists, default set to .GlobalEnv, only needed when autoassign is TRUE. If deploying on RStudio Connect, may require using \code{knitr::knit_global()}.
+#' @param ... Additional parameters passed to \code{assign}
+#'
+#' @return S3 class object.
+#' @export
+#' @examples
+#' \dontrun{
+#' my_baton <- create_baton()
+#'
+#' set_relay_type(my_baton, 'CANCELLED')
+#' read_metadata(my_baton)$relay_type
+#'
+#' set_referee(my_baton, 'COMPETITION')
+#' read_metadata(my_baton)$relay_type
+#' }
+set_relay_type <- function(baton, threshold = getOption('relay_type', default = 'COMPETITION'), suppressWarnings = TRUE, autoassign = TRUE, envir = .GlobalEnv, ...) {
+
+  # Use baton in env or load from YAML
+  if(inherits(baton, 'baton')) {
+    validate_baton(baton)
+  } else if(file.exists(baton)) {
+    message('Attempting to load baton from YAML...')
+    baton <- convert_yml2baton(baton)
+    validate_baton(baton)
+  }
+
+  btn_name <- deparse(substitute(baton))
+
+  relay_types <- list('CANCELLED' = 1, 'PRACTICE' = 2, 'COMPETITION' = 3)
+  threshold <- toupper(threshold)
+  threshold <- match.arg(threshold, choices = names(relay_types), several.ok = FALSE)
+
+
+  # Update in-memory baton
+  baton$metadata$relay_type <- threshold
+
+  # Attempt to update metadata in source YAML
+  tryCatch({
+    tmp_baton <- convert_yml2baton(baton$metadata$location)
+    tmp_baton$metadata$relay_type <- threshold
+    convert_baton2yml(tmp_baton, write = TRUE)
+  },
+  error = function(err) {
+    stop('Could not overwrite `relay_type` for baton YAML file.')
+  })
+
+  # Return value to env
+  if(autoassign){
+    assign(btn_name, baton, envir = envir, ...) #TODO use locate_batons? or mget loop?
+  } else {
+    invisible(baton)
+  }
 }

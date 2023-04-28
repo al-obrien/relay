@@ -6,7 +6,7 @@
 \usage{
 set_referee(
   baton,
-  threshold = "TRACE",
+  threshold = getOption("relay_referee", default = "TRACE"),
   suppressWarnings = TRUE,
   autoassign = TRUE,
   envir = .GlobalEnv,
@@ -32,6 +32,9 @@ S3 class object.
 \description{
 \code{set_referee} is a helper function to set the 'referee' of the baton; this controls what threshold of content is written to the logbook. The
 updated metadata will occur both in the source YAML as well as the R object for paired consistency.
+}
+\details{
+The default threshold is set to \code{'TRACE'} and can be overriden directly or by setting the global options via \code{options(relay_referee = 'TRACE')}.
 }
 \examples{
 \dontrun{

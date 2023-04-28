@@ -16,7 +16,7 @@ write_logbook(
 )
 }
 \arguments{
-\item{baton}{R object of S3 class, created by \code{\link{create_baton}}}
+\item{baton}{R object of S3 class, created by \code{\link{create_baton}}.}
 
 \item{msg}{Location of YAML file that was saved from a \emph{baton}.}
 

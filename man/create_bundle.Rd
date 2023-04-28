@@ -9,7 +9,7 @@ create_bundle(baton, dir, tree = NULL, tag = "_bundle-", mode, ...)
 \arguments{
 \item{baton}{R object of S3 class, created by \code{\link{create_baton}}.}
 
-\item{dir}{character value for loaction to create the bundle on the file system.}
+\item{dir}{character value for location to create the bundle on the file system.}
 
 \item{tree}{character vector for sub directories; default has no sub-directories set.}
 

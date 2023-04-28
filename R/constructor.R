@@ -4,13 +4,13 @@
 #'
 #' By default, the content of the \emph{baton} will be empty, only the metadata will be populated. The S3 object created will have an associated
 #' YAML file made, in a temporary location if no set location provided to \code{loc}. There is also the ability to automatically assign the S3 object
-#' to the R environment in case that is easier to remember.
+#' to the R environment in case that is easier to remember. Some behavior can be controlled by global options, such as the referee and relay type.
 #'
 #' The metadata of a bundle includes the following:
 #' \enumerate{
 #'    \item id: unique ID of baton based upon time stamp and random numbers.
-#'    \item referee: defines the threshold of content to write to the logbook, 'TRACE' is the lowest and the default.
-#'    \item relay_type: defines the type of baton as one of 'CANCELLED', 'PRACTICE', or 'COMPETITION' (default).
+#'    \item referee: defines the threshold of content to write to the logbook, 'TRACE' is the lowest and the default; can be set by global setting, \code{options(relay_referee = "TRACE")}.
+#'    \item relay_type: defines the type of baton as one of 'CANCELLED', 'PRACTICE', or 'COMPETITION' (default); can be set by global setting, \code{options(relay_type = "COMPETITION")}.
 #'    \item relay_start: time stamp when baton first created (matched ID).
 #'    \item relay_finish: time the baton was last passed (will not be populated if in middle of pass).
 #'    \item all_grabs: time stamps for all grabs or intercepts that occurred (excludes initial creation time).
@@ -55,8 +55,8 @@ create_baton <- function(content = list(), loc = NULL, auto_assign = FALSE, envi
   loc <- file.path(loc, paste0('_baton-', id, '.yml'))
 
   baton <- structure(list(metadata = list(id = id,
-                                          referee = 'TRACE',
-                                          relay_type = 'COMPETITION',
+                                          referee = getOption("relay_referee", default = 'TRACE'),
+                                          relay_type = getOption("relay_type", default = 'COMPETITION'),
                                           relay_start = format(start, '%Y-%m-%d %H-%M-%S'),
                                           relay_finish = NA,
                                           all_grabs = NULL,
@@ -98,7 +98,7 @@ create_baton <- function(content = list(), loc = NULL, auto_assign = FALSE, envi
 #' passes checks from batons.
 #'
 #' @param baton R object of S3 class, created by \code{\link{create_baton}}.
-#' @param dir character value for loaction to create the bundle on the file system.
+#' @param dir character value for location to create the bundle on the file system.
 #' @param tree character vector for sub directories; default has no sub-directories set.
 #' @param tag character value for prefixed label to the bundled folder.
 #' @param mode passed to \code{\link{Sys.chmod}}.
