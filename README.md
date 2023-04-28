@@ -61,13 +61,13 @@ For more complex workflows, one method is to create *bundled* content
 that passes through *checkpoints*. Several helper-functions in {relay}
 assist in this approach. Building from the prior example, one may start
 with a folder that serves as a staging area for all of a workflows
-dependent data; let us call this the *\\raw* folder. A *baton* tracks
-content that should exist in *\\raw*. A downstream process responsible
-for processing will leverage *\\raw* and its *baton*, let us call this
-folder *\\bundle-raw*. We create this folder with a helper function
+dependent data; let us call this the *\raw* folder. A *baton* tracks
+content that should exist in *\raw*. A downstream process responsible
+for processing will leverage *\raw* and its *baton*, let us call this
+folder *\bundle-raw*. We create this folder with a helper function
 `create_bundle()`, or manually if preferred, perhaps containing a new
-sub-folder called *.\\processed* and another called *.\\raw* which is a
-copy of content from the original *\\raw*. The *baton* associated with
+sub-folder called *.\processed* and another called *.\raw* which is a
+copy of content from the original *\raw*. The *baton* associated with
 the data queries can be grabbed for inspection. Based upon the metadata
 and content of the *baton*, the processing step may halt or proceed, the
 conditions of success are up to you. However, if the *baton* was never
@@ -115,9 +115,9 @@ remotes::install_github('al-obrien/relay')
 
 ### First Process
 
-Create the baton, and after the workflow process, the baton\_content
-will check to see if specific datasets are present and the time they
-were created when the baton was in the relay.
+Create the baton, and after the workflow process, the baton_content will
+check to see if specific datasets are present and the time they were
+created when the baton was in the relay.
 
 ``` r
 # Load
@@ -157,7 +157,7 @@ determine specific types of output to be generated if the check fails.
 ``` r
 # Grab baton
 work_loc <- '/my/fav/loc'
-my_baton <- grab_baton(loc = file.path(work_loc, list.files(raw_loc, pattern = '^_baton-\\.*')[1])
+my_baton <- grab_baton(loc = file.path(work_loc, locate_batons(work_loc)[1])
 
                             
 # Perform checks to determine what following steps are performed
@@ -178,3 +178,63 @@ plot(my_baton)
 ```
 
 <img src="README_files/figure-gfm/unnamed-chunk-5-1.png" width="100%" />
+
+## Locate batons
+
+As a workflow grows, it may become more difficult to find where they are
+in the R environment or on the file system. It is recommended to use
+`locate_batons()` for this purpose. This also allows the user to define
+which **relay_type** to search for. This could be important if you have
+a mix of testing batons mixed in with ones being actively used.
+
+``` r
+# Location on file system that has baton objects saved
+work_loc <- '/my/fav/loc'
+
+# Get list from location of interest, exclude all test batons
+baton_2_load <- locate_batons(work_loc, relay_type = 'COMPETITION')
+
+# Examine information, slice top
+baton_2_load_info <- file.info(baton_2_load)
+baton_2_load <- baton_2_load[1]
+
+# Load the baton of interest
+my_baton <- grab_baton(loc = baton_2_load)
+```
+
+## Examine baton
+
+There are several helper functions to make it easier to examine contents
+of a baton, either within the R session or through the connection to the
+persistent YAML file.
+
+``` r
+# Within R session
+read_metadata(my_baton, subset = c('pass_complete', 'relay_type', 'relay_start', 'relay_finish'))
+
+# If from YAML
+read_metadata(loc = 'path/to/baton.yml')
+```
+
+    ## $pass_complete
+    ## [1] TRUE
+    ## 
+    ## $relay_type
+    ## [1] "COMPETITION"
+    ## 
+    ## $relay_start
+    ## [1] "2023-04-28 15-13-26"
+    ## 
+    ## $relay_finish
+    ## [1] "2023-04-28 15-13-33"
+
+For functions such as `summary` and `plot`, one may not want to load the
+baton directly. However, since these functions require a specific class
+to operate, one can not simply just read the YAML file. Instead, we can
+use the `preview_baton()` constructor and pass this to the appropriate
+generics.
+
+``` r
+plot(preview_baton('path/to/baton.yml'))
+summary(preview_baton('path/to/baton.yml'))
+```

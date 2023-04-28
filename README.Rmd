@@ -69,7 +69,7 @@ Grab the baton from the initial process, and perform a checkpoint before proceed
 ```{r eval = FALSE}
 # Grab baton
 work_loc <- '/my/fav/loc'
-my_baton <- grab_baton(loc = file.path(work_loc, list.files(raw_loc, pattern = '^_baton-\\.*')[1])
+my_baton <- grab_baton(loc = file.path(work_loc, locate_batons(work_loc)[1])
 
                             
 # Perform checks to determine what following steps are performed
@@ -102,5 +102,47 @@ Sys.sleep(3)
 my_baton <- pass_baton(my_baton)
 
 plot(my_baton)
+```
+
+## Locate batons
+
+As a workflow grows, it may become more difficult to find where they are in the R environment or on the file system. It is recommended to use `locate_batons()` for this purpose. This also allows the user to define which **relay_type** to search for. This could be important if you have a mix of testing batons mixed in with ones being actively used. 
+
+```{r, eval = FALSE}
+# Location on file system that has baton objects saved
+work_loc <- '/my/fav/loc'
+
+# Get list from location of interest, exclude all test batons
+baton_2_load <- locate_batons(work_loc, relay_type = 'COMPETITION')
+
+# Examine information, slice top
+baton_2_load_info <- file.info(baton_2_load)
+baton_2_load <- baton_2_load[1]
+
+# Load the baton of interest
+my_baton <- grab_baton(loc = baton_2_load)
+```
+
+## Examine baton
+
+There are several helper functions to make it easier to examine contents of a baton, either within the R session or through the connection to the persistent YAML file.
+
+```{r, eval = FALSE}
+# Within R session
+read_metadata(my_baton, subset = c('pass_complete', 'relay_type', 'relay_start', 'relay_finish'))
+
+# If from YAML
+read_metadata(loc = 'path/to/baton.yml')
+```
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+read_metadata(my_baton, subset = c('pass_complete', 'relay_type', 'relay_start', 'relay_finish'))
+```
+
+For functions such as `summary` and `plot`, one may not want to load the baton directly. However, since these functions require a specific class to operate, one can not simply just read the YAML file. Instead, we can use the `preview_baton()` constructor and pass this to the appropriate generics.
+
+```{r, eval = FALSE}
+plot(preview_baton('path/to/baton.yml'))
+summary(preview_baton('path/to/baton.yml'))
 ```
 
