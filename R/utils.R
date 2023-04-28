@@ -726,3 +726,14 @@ plot.baton <- function(baton,
            bty ='n')
   }
 }
+
+#' Check if object is of class baton
+#'
+#' Will check if the object inherits the 'baton' class.
+#'
+#' @inherit methods::is
+#'
+#' @export
+is.baton <- function(object) {
+  inherits(object, 'baton')
+}
