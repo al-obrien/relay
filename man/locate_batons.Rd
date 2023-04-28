@@ -4,10 +4,18 @@
 \alias{locate_batons}
 \title{Locate batons}
 \usage{
-locate_batons(loc = .GlobalEnv, suppress_messages = FALSE, ...)
+locate_batons(
+  loc = .GlobalEnv,
+  relay_type = getOption("relay_type", default = c("CANCELLED", "PRACTICE",
+    "COMPETITION")),
+  suppress_messages = FALSE,
+  ...
+)
 }
 \arguments{
 \item{loc}{location to look for \emph{batons}; default set to \code{.GlobalEnv}, file paths can also be used.}
+
+\item{relay_type}{character value for the type of the baton (e.g. 'CANCELLED', 'PRACTICE', or 'COMPETITION'); default is all of them.}
 
 \item{suppress_messages}{boolean value to determine if messages listing discovered \emph{batons} are suppressed.}
 
@@ -25,6 +33,13 @@ Search for batons in R environment or directory.
 locate_batons('path/to/baton/directory')
 
 # Check R environment
+locate_batons()
+
+# Locate specific type of batons
+locate_batons(relay_type = 'PRACTICE')
+
+# Use global option to have defaults set to just the one type
+options(relay_type = 'PRACTICE')
 locate_batons()
 }
 }

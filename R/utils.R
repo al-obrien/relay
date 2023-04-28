@@ -32,6 +32,7 @@ clear_batons <- function(baton, loc = NULL, envir = .GlobalEnv, ...) {
 #' Search for batons in R environment or directory.
 #'
 #' @param loc location to look for \emph{batons}; default set to \code{.GlobalEnv}, file paths can also be used.
+#' @param relay_type character value for the type of the baton (e.g. 'CANCELLED', 'PRACTICE', or 'COMPETITION'); default is all of them.
 #' @param suppress_messages boolean value to determine if messages listing discovered \emph{batons} are suppressed.
 #' @param ... parameters passed to \code{\link{list.files}}.
 #'
@@ -45,8 +46,17 @@ clear_batons <- function(baton, loc = NULL, envir = .GlobalEnv, ...) {
 #'
 #' # Check R environment
 #' locate_batons()
+#'
+#' # Locate specific type of batons
+#' locate_batons(relay_type = 'PRACTICE')
+#'
+#' # Use global option to have defaults set to just the one type
+#' options(relay_type = 'PRACTICE')
+#' locate_batons()
 #' }
-locate_batons <- function(loc = .GlobalEnv, suppress_messages = FALSE, ...){
+locate_batons <- function(loc = .GlobalEnv,
+                          relay_type = getOption('relay_type', default = c('CANCELLED', 'PRACTICE', 'COMPETITION')),
+                          suppress_messages = FALSE, ...){
 
   # If environment
   if(is.environment(loc)) {
@@ -54,6 +64,10 @@ locate_batons <- function(loc = .GlobalEnv, suppress_messages = FALSE, ...){
     if(!suppress_messages) {message('Environment variable detected, searching that location in R.')}
     l_objs <- ls(envir = loc)
     batons <- l_objs[vapply(l_objs, function(x) {inherits(get(x), 'baton') }, logical(1), USE.NAMES = F)]
+
+    # Keep of specific relay type
+    batons <- batons[purrr::map_lgl(mget(batons, envir = loc), ~read_metadata(.)$relay_type %in% relay_type)]
+
     if(!suppress_messages) {
       if(length(batons) > 0) {
         writeLines(strwrap(paste0('The following batons are in the selected environment: ', paste0(batons, collapse = ', '))))
@@ -71,7 +85,12 @@ locate_batons <- function(loc = .GlobalEnv, suppress_messages = FALSE, ...){
   } else {
 
     if(!suppress_messages) {message('File path detected, searching that location on drive.')}
+
     batons <- list.files(loc, pattern = '^_baton-.*\\.yml', ...)
+    batons_fn <- do.call(list.files,
+                         modifyList(list(...), list(path = loc, pattern = '^_baton-.*\\.yml', full.names = TRUE)))
+    batons <- batons[purrr::map_lgl(batons_fn, ~read_metadata(loc = .)$relay_type %in% relay_type)]
+
     if(!suppress_messages) writeLines(strwrap(paste0('The following batons are in the selected directory: ', paste0(batons, collapse = ', '))))
     invisible(batons)
 
